@@ -1,0 +1,26 @@
+#########################
+# .gitignore file for uDisplayManager project
+#
+#########################
+
+#####
+# OS X temporary files that should never be committed
+
+.DS_Store
+*.swp
+*.lock
+profile
+
+####
+# Visual studio code
+.vscode/
+
+####
+# Python specific
+#
+# Ignore compiled python files
+*.pyc
+
+####
+# PyMakr config file
+pymakr.conf
