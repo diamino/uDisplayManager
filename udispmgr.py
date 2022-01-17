@@ -1,9 +1,9 @@
 """
 >> Basic display manager for Micropython <<
 
-Currently only menu's with submenu's are supported.
+Currently only menus with submenus are supported.
 
-The 'main' function runs a simple testcase on a SSD1306 128x64 OLED display.
+The 'main' function runs a simple testcase on an SSD1306 128x64 OLED display.
 
 Diamino 2022
 """
@@ -14,6 +14,7 @@ DM_EVENT_LEFT = 2
 DM_EVENT_RIGHT = 3
 DM_EVENT_BUTTON_DOWN = 4
 DM_EVENT_BUTTON_UP = 5
+DM_EVENT_REDRAW = 6
 
 DM_TRANS_BACK = 1
 
@@ -33,7 +34,8 @@ class Screen():
         self.backscreen = back
 
     def handle_event(self, event):
-        pass
+        if event == DM_EVENT_REDRAW:
+            self.redraw()
 
     def redraw(self):
         self.display.fill(0)
@@ -111,7 +113,7 @@ class DisplayManager():
     def handle_event(self, event):
         self.activescreen.handle_event(event)
 
-
+# Simple testcase using SSD1306 OLED display
 def main():
     from machine import Pin, I2C
     from ssd1306 import SSD1306_I2C
@@ -143,7 +145,8 @@ def main():
                         title="Main Menu")
 
     dm = DisplayManager(oled, menu1)
-    dm.redraw()
+    #dm.redraw()
+    dm.handle_event(DM_EVENT_REDRAW)
     time.sleep(3)
     dm.handle_event(DM_EVENT_DOWN) # Select Submenu 2
     time.sleep(1)
