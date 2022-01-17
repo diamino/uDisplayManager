@@ -41,7 +41,7 @@ submenu1 = udispmgr.ScreenMenu((('Subitem 1.1', None),
 submenu2 = udispmgr.ScreenMenu((('Subitem 2.1', None),
                         ('Subitem 2.2', None),
                         ('Subitem 2.3', None),
-                        ('Back', DM_TRANS_BACK)),
+                        ('Back', udispmgr.DM_TRANS_BACK)),
                         title="Submenu 2")
 menu1 = udispmgr.ScreenMenu((('Submenu 1', submenu1),
                     ('Submenu 2', submenu2)),
