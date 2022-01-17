@@ -145,32 +145,24 @@ def main():
                         title="Main Menu")
 
     dm = DisplayManager(oled, menu1)
-    #dm.redraw()
-    dm.handle_event(DM_EVENT_REDRAW)
-    time.sleep(3)
-    dm.handle_event(DM_EVENT_DOWN) # Select Submenu 2
-    time.sleep(1)
-    dm.handle_event(DM_EVENT_BUTTON_DOWN) # Enter Submenu 2
-    time.sleep(1)
-    dm.handle_event(DM_EVENT_DOWN) # Select Subitem 2.2
-    time.sleep(2)
-    dm.handle_event(DM_EVENT_UP) # Select Subitem 2.1
-    time.sleep(2)
-    dm.handle_event(DM_EVENT_UP) # Should be ignored
-    time.sleep(1)
-    dm.handle_event(DM_EVENT_DOWN) # Select Subitem 2.2
-    time.sleep(1)
-    dm.handle_event(DM_EVENT_DOWN) # Select Subitem 2.3
-    time.sleep(1)
-    dm.handle_event(DM_EVENT_DOWN) # Select Back
-    time.sleep(1)
-    dm.handle_event(DM_EVENT_BUTTON_DOWN) # Go back to 'Main' menu
-    time.sleep(1)
-    dm.handle_event(DM_EVENT_DOWN) # Should be ignored
-    time.sleep(1)
-    dm.handle_event(DM_EVENT_UP) # Select Submenu 1
-    time.sleep(1)
-    dm.handle_event(DM_EVENT_BUTTON_DOWN) # Enter Submenu 1
+
+    testevents = [DM_EVENT_REDRAW,      # Draw menu on screen
+                  DM_EVENT_DOWN,        # Select Submenu 2
+                  DM_EVENT_BUTTON_DOWN, # Enter Submenu 2
+                  DM_EVENT_DOWN,        # Select Subitem 2.2
+                  DM_EVENT_UP,          # Select Subitem 2.1
+                  DM_EVENT_UP,          # Should be ignored (already on first item)
+                  DM_EVENT_DOWN,        # Select Subitem 2.2
+                  DM_EVENT_DOWN,        # Select Subitem 2.3
+                  DM_EVENT_DOWN,        # Select Back
+                  DM_EVENT_BUTTON_DOWN, # Go back to 'Main' menu
+                  DM_EVENT_DOWN,        # Should be ignored
+                  DM_EVENT_UP,          # Select Submenu 1
+                  DM_EVENT_BUTTON_DOWN] # Enter Submenu 1
+
+    for event in testevents:
+        dm.handle_event(event)
+        time.sleep(1)
 
 
 if __name__ == "__main__":
