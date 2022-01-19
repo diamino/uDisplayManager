@@ -16,7 +16,8 @@ DM_EVENT_BUTTON_DOWN = 4
 DM_EVENT_BUTTON_UP = 5
 DM_EVENT_REDRAW = 6
 
-DM_TRANS_BACK = 1
+DM_ACTION_BACK = 1
+DM_ACTION_SELECT = 2
 
 class Screen():
 
@@ -91,7 +92,7 @@ class ScreenMenu(Screen):
                     self.display.show()
         elif event == DM_EVENT_BUTTON_DOWN:
             target = self.items[self.activeitem][1]
-            if target == DM_TRANS_BACK:
+            if target == DM_ACTION_BACK:
                 self.displaymanager.transition(self.backscreen)
             elif isinstance(target, Screen):
                 self.displaymanager.transition(target, True)
@@ -159,12 +160,12 @@ def main():
 
     submenu1 = ScreenMenu((('Subitem 1.1', None),
                            ('Subitem 1.2', None),
-                           ('Back', DM_TRANS_BACK)),
+                           ('Back', DM_ACTION_BACK)),
                            title="Submenu 1")
     submenu2 = ScreenMenu((('Subitem 2.1', None),
                            ('Subitem 2.2', None),
                            ('Subitem 2.3', None),
-                           ('Back', DM_TRANS_BACK)),
+                           ('Back', DM_ACTION_BACK)),
                            title="Submenu 2")
     submenu3 = ScreenMenu((('Subitem 3.1', None),
                            ('Subitem 3.2', None),
@@ -172,7 +173,7 @@ def main():
                            ('Subitem 3.4', None),
                            ('Subitem 3.5', None),
                            ('Subitem 3.6', None),
-                           ('Back', DM_TRANS_BACK)),
+                           ('Back', DM_ACTION_BACK)),
                            title="Submenu 3")
     menu1 = ScreenMenu((('Submenu 1', submenu1),
                         ('Submenu 2', submenu2),
