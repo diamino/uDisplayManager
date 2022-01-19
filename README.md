@@ -8,7 +8,7 @@ uDisplayManager is a very basic display manager for use with MicroPython. The di
 Currently only menus with submenus (and subsubmenus, and subsubsubmenus, and ...) are implemented. But it is very easy to extend the display manager with other 'Screens' by subclassing the `Screen` class.
 
 ### ToDo
-* Scrolling menus
+* Options in menus to enable and disable items
 * Value entry screens
 * Simple text screens
 
@@ -58,6 +58,8 @@ Through subclassing of the `Screen` class extra screens can be created.
 
 ## Version History
 
+* 0.2
+    * Scrolling menus
 * 0.1
     * Initial Release
 
