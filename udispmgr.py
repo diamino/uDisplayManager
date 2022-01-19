@@ -96,6 +96,8 @@ class ScreenMenu(Screen):
                 self.displaymanager.transition(self.backscreen)
             elif isinstance(target, Screen):
                 self.displaymanager.transition(target, True)
+            elif callable(target):
+                target(self)
         else:
             # Not implemented here. Call super event handler
             super().handle_event(event)
@@ -158,12 +160,15 @@ def main():
 
     oled = SSD1306_I2C(OLED_WIDTH, OLED_HEIGHT, i2c)
 
+    def subitem2_2_handler(screen):
+        print("Subitem 2.2 handler called...")
+
     submenu1 = ScreenMenu((('Subitem 1.1', None),
                            ('Subitem 1.2', None),
                            ('Back', DM_ACTION_BACK)),
                            title="Submenu 1")
     submenu2 = ScreenMenu((('Subitem 2.1', None),
-                           ('Subitem 2.2', None),
+                           ('Subitem 2.2', subitem2_2_handler),
                            ('Subitem 2.3', None),
                            ('Back', DM_ACTION_BACK)),
                            title="Submenu 2")
@@ -183,44 +188,44 @@ def main():
     dm = DisplayManager(oled, menu1)
 
     ## Basic testcase
-    # testevents = [DM_EVENT_REDRAW,      # Draw menu on screen
-    #               DM_EVENT_DOWN,        # Select Submenu 2
-    #               DM_EVENT_BUTTON_DOWN, # Enter Submenu 2
-    #               DM_EVENT_DOWN,        # Select Subitem 2.2
-    #               DM_EVENT_UP,          # Select Subitem 2.1
-    #               DM_EVENT_UP,          # Should be ignored (already on first item)
-    #               DM_EVENT_DOWN,        # Select Subitem 2.2
-    #               DM_EVENT_DOWN,        # Select Subitem 2.3
-    #               DM_EVENT_DOWN,        # Select Back
-    #               DM_EVENT_BUTTON_DOWN, # Go back to 'Main' menu
-    #               DM_EVENT_DOWN,        # Should be ignored
-    #               DM_EVENT_UP,          # Select Submenu 1
-    #               DM_EVENT_BUTTON_DOWN] # Enter Submenu 1
+    testevents = [DM_EVENT_REDRAW,      # Draw menu on screen
+                  DM_EVENT_DOWN,        # Select Submenu 2
+                  DM_EVENT_BUTTON_DOWN, # Enter Submenu 2
+                  DM_EVENT_DOWN,        # Select Subitem 2.2
+                  DM_EVENT_UP,          # Select Subitem 2.1
+                  DM_EVENT_UP,          # Should be ignored (already on first item)
+                  DM_EVENT_DOWN,        # Select Subitem 2.2
+                  DM_EVENT_BUTTON_DOWN, # Activate Subitem 2.2
+                  DM_EVENT_DOWN,        # Select Subitem 2.3
+                  DM_EVENT_DOWN,        # Select Back
+                  DM_EVENT_BUTTON_DOWN, # Go back to 'Main' menu
+                  DM_EVENT_UP,          # Select Submenu 1
+                  DM_EVENT_BUTTON_DOWN] # Enter Submenu 1
     ## Testcase for scrollable menus
-    testevents = [DM_EVENT_REDRAW,
-                  DM_EVENT_DOWN,
-                  DM_EVENT_DOWN,
-                  DM_EVENT_BUTTON_DOWN,
-                  DM_EVENT_DOWN, # 3.2
-                  DM_EVENT_DOWN, # 3.3
-                  DM_EVENT_DOWN, # 3.4
-                  DM_EVENT_DOWN, # 3.5
-                  DM_EVENT_DOWN, # 3.6
-                  DM_EVENT_UP,   # 3.5
-                  DM_EVENT_UP,   # 3.4
-                  DM_EVENT_UP,   # 3.3
-                  DM_EVENT_UP,   # 3.2
-                  DM_EVENT_UP,   # 3.1
-                  DM_EVENT_UP,   # should be ignored (already on first item)
-                  DM_EVENT_DOWN, # 3.2
-                  DM_EVENT_DOWN, # 3.3
-                  DM_EVENT_DOWN, # 3.4
-                  DM_EVENT_DOWN, # 3.5
-                  DM_EVENT_DOWN, # 3.6
-                  DM_EVENT_DOWN, # Back
-                  DM_EVENT_DOWN, # Should be ignored (already on last item)
-                  DM_EVENT_BUTTON_DOWN,
-                  DM_EVENT_REDRAW,]
+    # testevents = [DM_EVENT_REDRAW,
+    #               DM_EVENT_DOWN,
+    #               DM_EVENT_DOWN,
+    #               DM_EVENT_BUTTON_DOWN,
+    #               DM_EVENT_DOWN, # 3.2
+    #               DM_EVENT_DOWN, # 3.3
+    #               DM_EVENT_DOWN, # 3.4
+    #               DM_EVENT_DOWN, # 3.5
+    #               DM_EVENT_DOWN, # 3.6
+    #               DM_EVENT_UP,   # 3.5
+    #               DM_EVENT_UP,   # 3.4
+    #               DM_EVENT_UP,   # 3.3
+    #               DM_EVENT_UP,   # 3.2
+    #               DM_EVENT_UP,   # 3.1
+    #               DM_EVENT_UP,   # should be ignored (already on first item)
+    #               DM_EVENT_DOWN, # 3.2
+    #               DM_EVENT_DOWN, # 3.3
+    #               DM_EVENT_DOWN, # 3.4
+    #               DM_EVENT_DOWN, # 3.5
+    #               DM_EVENT_DOWN, # 3.6
+    #               DM_EVENT_DOWN, # Back
+    #               DM_EVENT_DOWN, # Should be ignored (already on last item)
+    #               DM_EVENT_BUTTON_DOWN,
+    #               DM_EVENT_REDRAW,]
 
     for event in testevents:
         dm.handle_event(event)
