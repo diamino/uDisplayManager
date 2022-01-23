@@ -34,17 +34,17 @@ Basically instantiate `Screen` objects linked to eachother using targets and fee
 ```python
 import udispmgr
 
-submenu1 = udispmgr.ScreenMenu((('Subitem 1.1', None),
-                        ('Subitem 1.2', None),
-                        ('Back', udispmgr.DM_TRANS_BACK)),
+submenu1 = udispmgr.ScreenMenu((MenuItem('Subitem 1.1'),
+                        MenuItem('Subitem 1.2'),
+                        MenuItemBack('Back')),
                         title="Submenu 1")
-submenu2 = udispmgr.ScreenMenu((('Subitem 2.1', None),
-                        ('Subitem 2.2', None),
-                        ('Subitem 2.3', None),
-                        ('Back', udispmgr.DM_TRANS_BACK)),
+submenu2 = udispmgr.ScreenMenu((MenuItem('Subitem 2.1'),
+                        MenuItem('Subitem 2.2'),
+                        menuItem('Subitem 2.3'),
+                        MenuItemBack('Back')),
                         title="Submenu 2")
-menu1 = udispmgr.ScreenMenu((('Submenu 1', submenu1),
-                    ('Submenu 2', submenu2)),
+menu1 = udispmgr.ScreenMenu((MenuItemSubmenu('Submenu 1', submenu1),
+                    MenuItemSubmenu('Submenu 2', submenu2)),
                     title="Main Menu")
 
 dm = udispmgr.DisplayManager(display, menu1)

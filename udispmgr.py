@@ -16,9 +16,6 @@ DM_EVENT_BUTTON_DOWN = 4
 DM_EVENT_BUTTON_UP = 5
 DM_EVENT_REDRAW = 6
 
-DM_ACTION_BACK = 1
-DM_ACTION_SELECT = 2
-
 class Screen():
 
     def __init__(self):
@@ -48,11 +45,26 @@ class Screen():
         self.display.fill(0)
         self.display.show()
 
+class MenuItem():
+
+    def __init__(self, name, callback = None):
+        self.name = name
+        self.callback = callback
+
+class MenuItemSubmenu(MenuItem):
+
+    def __init__(self, name, submenu, **kwargs):
+        super().__init__(name, **kwargs)
+        self.submenu = submenu
+
+class MenuItemBack(MenuItem):
+    pass
+
 class ScreenMenu(Screen):
 
     title_height = 16    
     item_height = 12
-    top_margin = 2
+    top_margin = 3
     left_margin = 5
 
     def __init__(self, items, title=None, activeitem = 0):
@@ -91,13 +103,13 @@ class ScreenMenu(Screen):
                     self.draw_menuitem(activeline + 1)
                     self.display.show()
         elif event == DM_EVENT_BUTTON_DOWN:
-            target = self.items[self.activeitem][1]
-            if target == DM_ACTION_BACK:
+            activeitem = self.items[self.activeitem]
+            if activeitem.callback:
+                activeitem.callback(self)
+            if isinstance(activeitem, MenuItemBack):
                 self.displaymanager.transition(self.backscreen)
-            elif isinstance(target, Screen):
-                self.displaymanager.transition(target, True)
-            elif callable(target):
-                target(self)
+            elif isinstance(activeitem, MenuItemSubmenu):
+                self.displaymanager.transition(activeitem.submenu, True)
         else:
             # Not implemented here. Call super event handler
             super().handle_event(event)
@@ -112,8 +124,13 @@ class ScreenMenu(Screen):
         if itemnr >= len(self.items):
             return
         active = (itemnr == self.activeitem)
+        item = self.items[itemnr]
         self.display.fill_rect(0, (linenr*self.item_height)+self.title_height, self.display.width, self.item_height, active)
-        self.display.text(self.items[itemnr][0], self.left_margin, (linenr*self.item_height)+self.title_height+1, not active)
+        self.display.text(item.name, self.left_margin, (linenr*self.item_height)+self.title_height+1, not active)
+        if isinstance(item, MenuItemSubmenu):
+            self.display.text('>', self.display.width - 10, (linenr*self.item_height)+self.title_height+1, not active)
+        elif isinstance(item, MenuItemBack):
+            self.display.text('<', self.display.width - 10, (linenr*self.item_height)+self.title_height+1, not active)
 
     def redraw(self):
         self.display.fill(0)
@@ -163,26 +180,26 @@ def main():
     def subitem2_2_handler(screen):
         print("Subitem 2.2 handler called...")
 
-    submenu1 = ScreenMenu((('Subitem 1.1', None),
-                           ('Subitem 1.2', None),
-                           ('Back', DM_ACTION_BACK)),
-                           title="Submenu 1")
-    submenu2 = ScreenMenu((('Subitem 2.1', None),
-                           ('Subitem 2.2', subitem2_2_handler),
-                           ('Subitem 2.3', None),
-                           ('Back', DM_ACTION_BACK)),
+    submenu2 = ScreenMenu((MenuItem('Subitem 2.1'),
+                           MenuItem('Subitem 2.2', callback = subitem2_2_handler),
+                           MenuItem('Subitem 2.3'),
+                           MenuItemBack('Back')),
                            title="Submenu 2")
-    submenu3 = ScreenMenu((('Subitem 3.1', None),
-                           ('Subitem 3.2', None),
-                           ('Subitem 3.3', None),
-                           ('Subitem 3.4', None),
-                           ('Subitem 3.5', None),
-                           ('Subitem 3.6', None),
-                           ('Back', DM_ACTION_BACK)),
+    submenu3 = ScreenMenu((MenuItem('Subitem 3.1'),
+                           MenuItem('Subitem 3.2'),
+                           MenuItem('Subitem 3.3'),
+                           MenuItem('Subitem 3.4'),
+                           MenuItem('Subitem 3.5'),
+                           MenuItem('Subitem 3.6'),
+                           MenuItemBack('Back')),
                            title="Submenu 3")
-    menu1 = ScreenMenu((('Submenu 1', submenu1),
-                        ('Submenu 2', submenu2),
-                        ('Submenu 3', submenu3)),
+    submenu1 = ScreenMenu((MenuItem('Subitem 1.1'),
+                           MenuItemSubmenu('Subitem 1.2', submenu3),
+                           MenuItemBack('Back')),
+                           title="Submenu 1")
+    menu1 = ScreenMenu((MenuItemSubmenu('Submenu 1', submenu1),
+                        MenuItemSubmenu('Submenu 2', submenu2),
+                        MenuItemSubmenu('Submenu 3', submenu3)),
                         title="Main Menu")
 
     dm = DisplayManager(oled, menu1)
@@ -195,37 +212,36 @@ def main():
                   DM_EVENT_UP,          # Select Subitem 2.1
                   DM_EVENT_UP,          # Should be ignored (already on first item)
                   DM_EVENT_DOWN,        # Select Subitem 2.2
-                  DM_EVENT_BUTTON_DOWN, # Activate Subitem 2.2
+                  DM_EVENT_BUTTON_DOWN, # Activate Subitem 2.2 (callback called)
                   DM_EVENT_DOWN,        # Select Subitem 2.3
                   DM_EVENT_DOWN,        # Select Back
                   DM_EVENT_BUTTON_DOWN, # Go back to 'Main' menu
                   DM_EVENT_UP,          # Select Submenu 1
-                  DM_EVENT_BUTTON_DOWN] # Enter Submenu 1
-    ## Testcase for scrollable menus
-    # testevents = [DM_EVENT_REDRAW,
-    #               DM_EVENT_DOWN,
-    #               DM_EVENT_DOWN,
-    #               DM_EVENT_BUTTON_DOWN,
-    #               DM_EVENT_DOWN, # 3.2
-    #               DM_EVENT_DOWN, # 3.3
-    #               DM_EVENT_DOWN, # 3.4
-    #               DM_EVENT_DOWN, # 3.5
-    #               DM_EVENT_DOWN, # 3.6
-    #               DM_EVENT_UP,   # 3.5
-    #               DM_EVENT_UP,   # 3.4
-    #               DM_EVENT_UP,   # 3.3
-    #               DM_EVENT_UP,   # 3.2
-    #               DM_EVENT_UP,   # 3.1
-    #               DM_EVENT_UP,   # should be ignored (already on first item)
-    #               DM_EVENT_DOWN, # 3.2
-    #               DM_EVENT_DOWN, # 3.3
-    #               DM_EVENT_DOWN, # 3.4
-    #               DM_EVENT_DOWN, # 3.5
-    #               DM_EVENT_DOWN, # 3.6
-    #               DM_EVENT_DOWN, # Back
-    #               DM_EVENT_DOWN, # Should be ignored (already on last item)
-    #               DM_EVENT_BUTTON_DOWN,
-    #               DM_EVENT_REDRAW,]
+                  DM_EVENT_BUTTON_DOWN, # Enter Submenu 1
+                  DM_EVENT_DOWN,        # Select Subitem 1.2
+                  DM_EVENT_BUTTON_DOWN, # Enter Subitem 1.2 (=submenu 3)
+                  DM_EVENT_DOWN, # 3.2
+                  DM_EVENT_DOWN, # 3.3
+                  DM_EVENT_DOWN, # 3.4
+                  DM_EVENT_DOWN, # 3.5
+                  DM_EVENT_DOWN, # 3.6
+                  DM_EVENT_UP,   # 3.5
+                  DM_EVENT_UP,   # 3.4
+                  DM_EVENT_UP,   # 3.3
+                  DM_EVENT_UP,   # 3.2
+                  DM_EVENT_UP,   # 3.1
+                  DM_EVENT_UP,   # should be ignored (already on first item)
+                  DM_EVENT_DOWN, # 3.2
+                  DM_EVENT_DOWN, # 3.3
+                  DM_EVENT_DOWN, # 3.4
+                  DM_EVENT_DOWN, # 3.5
+                  DM_EVENT_DOWN, # 3.6
+                  DM_EVENT_DOWN, # Back
+                  DM_EVENT_DOWN, # Should be ignored (already on last item)
+                  DM_EVENT_BUTTON_DOWN, # Back to submenu 1
+                  DM_EVENT_DOWN, # Select back
+                  DM_EVENT_BUTTON_DOWN, # Back to main menu
+                  DM_EVENT_REDRAW,]
 
     for event in testevents:
         dm.handle_event(event)
